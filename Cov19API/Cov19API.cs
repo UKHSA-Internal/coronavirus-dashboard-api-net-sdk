@@ -31,23 +31,11 @@ namespace Cov19API
 
     public class Cov19API
     {
-        private readonly UKCovid19Props props;
-        
+        private readonly UkCovid19Props props;
+
         private string Endpoint = "https://api.coronavirus.data.gov.uk/v1/data";
 
-        private readonly Dictionary<string, string> structure;
-
-        private readonly Dictionary<string, string> filters;
-
-        private readonly string latestBy;
-
-        private DateTimeOffset _lastUpdate;
-
-        public Dictionary<string, string> HeadType;
-
-        public Dictionary<string, object> OptionsType;
-
-        public APIParams ApiParams =>
+        private APIParams ApiParams =>
             new APIParams
             {
                 Filters = string.Join(";", this.props.FiltersType.Select(kv => kv.Key + "=" + kv.Value).ToArray()),
@@ -55,16 +43,7 @@ namespace Cov19API
                 LatestBy = this.props.LatestBy
             };
 
-        public class UKCovid19Props
-        {
-            public Dictionary<string, string> FiltersType { get; set; }
-
-            public Dictionary<string, string> StructureType { get; set; }
-
-            public string LatestBy { get; set; }
-        }
-
-        public class APIParams
+        private class APIParams
         {
             public string Filters { get; set; }
 
@@ -78,37 +57,19 @@ namespace Cov19API
             }
         }
 
-        public class APIJSONResponse<T>
+        private class APIJSONResponse<T>
         {
             public List<T> Data { get; set; }
         }
 
-        public class JSONResponse<T>
-        {
-            public List<T> Data { get; set; }
+        public DateTimeOffset LastUpdate { get; set; }
 
-            public int Length { get; set; }
-
-            public string LastUpdate { get; set; }
-
-            public int TotalPages { get; set; }
-        }
-
-        public enum Format
-        {
-            JSON = 0,
-
-            CSV = 1,
-
-            XML = 2
-        }
-
-        public Cov19API(UKCovid19Props props)
+        public Cov19API(UkCovid19Props props)
         {
             this.props = props;
         }
 
-        private async Task<(APIJSONResponse<T> Data, int TotalPages)> GetPagedData<T>(Format format, CancellationToken cancellationToken)
+        private async Task<(APIJSONResponse<T> Response, int TotalPages)> GetPagedData<T>(Format format, CancellationToken cancellationToken)
         {
             var result = new APIJSONResponse<T> { Data = new List<T>() };
 
@@ -130,7 +91,7 @@ namespace Cov19API
                     throw new Exception(response.StatusCode.ToString());
                 }
 
-                this._lastUpdate = response.Content.Headers.LastModified ?? DateTimeOffset.MinValue;
+                this.LastUpdate = response.Content.Headers.LastModified ?? DateTimeOffset.MinValue;
 
                 var body = await response.Content.ReadAsStringAsync();
                 var jObject = JObject.Parse(body);
@@ -141,7 +102,7 @@ namespace Cov19API
                 currentPage++;
             }
 
-            return (result, currentPage-1);
+            return (result, currentPage - 1);
         }
 
         public async Task<JSONResponse<T>> Get<T>(Format format = Format.JSON, CancellationToken cancellationToken = default)
@@ -149,10 +110,10 @@ namespace Cov19API
             var data = await this.GetPagedData<T>(format, cancellationToken);
             return new JSONResponse<T>
             {
-                Length = data.Data.Data.Count,
-                Data = data.Data.Data,
+                Length = data.Response.Data.Count,
+                Data = data.Response.Data,
                 TotalPages = data.TotalPages,
-                LastUpdate = this._lastUpdate.ToString("O")
+                LastUpdate = this.LastUpdate.ToString("O")
             };
         }
 
@@ -162,6 +123,14 @@ namespace Cov19API
             var url = this.Endpoint + this.ApiParams;
             var response = await httpClient.GetAsync(url, cancellationToken);
             return response.Headers;
+        }
+
+        public async Task<string> Options(CancellationToken cancellationToken = default)
+        {
+            var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            var req = new HttpRequestMessage(HttpMethod.Options, this.Endpoint);
+            var response = await httpClient.SendAsync(req, cancellationToken);
+            return await response.Content.ReadAsStringAsync();
         }
     }
 }

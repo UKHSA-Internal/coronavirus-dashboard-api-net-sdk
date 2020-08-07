@@ -17,7 +17,7 @@ namespace SampleApp
     {
         static async Task Main(string[] args)
         {
-            var cov19api = new Cov19API(new Cov19API.UKCovid19Props
+            var cov19api = new Cov19API(new UkCovid19Props
             {
                 FiltersType = new Dictionary<string, string> { { "areaType", "nation" }, { "areaName", "England" } },
                 StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } }
@@ -28,6 +28,15 @@ namespace SampleApp
             foreach (var covidData in data.Data)
             {
                 Console.WriteLine($"Date:{covidData.MyDate} No. of New Cases:{covidData.NewCases}");
+            }
+
+            var openApi = await cov19api.Options();
+            Console.WriteLine(openApi);
+
+            var headers = await cov19api.Head();
+            foreach (var httpResponseHeader in headers)
+            {
+                Console.WriteLine(httpResponseHeader.Key + " : " + string.Join(",", httpResponseHeader.Value));
             }
         }
     }
