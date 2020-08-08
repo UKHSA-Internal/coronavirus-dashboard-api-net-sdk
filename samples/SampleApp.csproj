@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Cov19API\Cov19API.csproj" />
+      <ProjectReference Include="..\src\Cov19API\Cov19API.csproj" />
     </ItemGroup>
 
 </Project>

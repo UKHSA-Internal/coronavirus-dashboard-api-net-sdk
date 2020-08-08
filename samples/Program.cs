@@ -17,7 +17,7 @@ namespace SampleApp
     {
         static async Task Main(string[] args)
         {
-            var cov19api = new Cov19API(new UkCovid19Props
+            var cov19api = new Cov19Api(new UkCovid19Props
             {
                 FiltersType = new Dictionary<string, string> { { "areaType", "nation" }, { "areaName", "England" } },
                 StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } }

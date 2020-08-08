@@ -29,13 +29,13 @@ namespace Cov19API
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
-    public class Cov19API
+    public class Cov19Api
     {
         private readonly UkCovid19Props props;
 
         private string Endpoint = "https://api.coronavirus.data.gov.uk/v1/data";
 
-        private APIParams ApiParams =>
+        internal APIParams ApiParams =>
             new APIParams
             {
                 Filters = string.Join(";", this.props.FiltersType.Select(kv => kv.Key + "=" + kv.Value).ToArray()),
@@ -43,7 +43,7 @@ namespace Cov19API
                 LatestBy = this.props.LatestBy
             };
 
-        private class APIParams
+        internal class APIParams
         {
             public string Filters { get; set; }
 
@@ -64,7 +64,7 @@ namespace Cov19API
 
         public DateTimeOffset LastUpdate { get; set; }
 
-        public Cov19API(UkCovid19Props props)
+        public Cov19Api(UkCovid19Props props)
         {
             this.props = props;
         }
