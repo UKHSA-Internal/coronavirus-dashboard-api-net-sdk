@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cov19API", "Cov19API\Cov19API.csproj", "{C6D0DBA7-6833-4929-AEEC-D626A1247489}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "SampleApp\SampleApp.csproj", "{218ECFA7-D58E-4219-9807-AD20180A23BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "..\samples\SampleApp.csproj", "{218ECFA7-D58E-4219-9807-AD20180A23BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
