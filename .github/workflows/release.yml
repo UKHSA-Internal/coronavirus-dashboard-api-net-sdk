@@ -20,6 +20,6 @@ jobs:
       - name: dotnet pack
         run: dotnet pack --configuration Release --nologo -o nuget ./src/Cov19API.sln
       - name: dotnet push
-        run: dotnet nuget push ./out/*.nupkg
+        run: dotnet nuget push ./nuget/UKCovid*.nupkg
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
