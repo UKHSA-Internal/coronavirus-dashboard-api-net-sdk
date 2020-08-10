@@ -26,6 +26,8 @@ namespace Cov19API
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.OpenApi.Models;
+    using Microsoft.OpenApi.Readers;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -33,7 +35,7 @@ namespace Cov19API
     {
         private readonly UkCovid19Props props;
 
-        private string Endpoint = "https://api.coronavirus.data.gov.uk/v1/data";
+        internal string Endpoint = "https://api.coronavirus.data.gov.uk/v1/data";
 
         internal APIParams ApiParams =>
             new APIParams
@@ -62,7 +64,7 @@ namespace Cov19API
             public List<T> Data { get; set; }
         }
 
-        public DateTimeOffset LastUpdate { get; set; }
+        private DateTimeOffset LastUpdated { get; set; }
 
         public Cov19Api(UkCovid19Props props)
         {
@@ -91,7 +93,7 @@ namespace Cov19API
                     throw new Exception(response.StatusCode.ToString());
                 }
 
-                this.LastUpdate = response.Content.Headers.LastModified ?? DateTimeOffset.MinValue;
+                this.LastUpdated = response.Content.Headers.LastModified ?? default;
 
                 var body = await response.Content.ReadAsStringAsync();
                 var jObject = JObject.Parse(body);
@@ -113,24 +115,45 @@ namespace Cov19API
                 Length = data.Response.Data.Count,
                 Data = data.Response.Data,
                 TotalPages = data.TotalPages,
-                LastUpdate = this.LastUpdate.ToString("O")
+                LastUpdate = this.LastUpdated.ToString("O")
             };
         }
 
-        public async Task<HttpResponseHeaders> Head(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<KeyValuePair<string, IEnumerable<string>>>> Head(CancellationToken cancellationToken = default)
         {
             var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             var url = this.Endpoint + this.ApiParams;
             var response = await httpClient.GetAsync(url, cancellationToken);
-            return response.Headers;
+            return response.Headers.Concat(response.Content.Headers);
         }
 
-        public async Task<string> Options(CancellationToken cancellationToken = default)
+        public async Task<OpenApiDocument> Options(CancellationToken cancellationToken = default)
         {
             var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             var req = new HttpRequestMessage(HttpMethod.Options, this.Endpoint);
             var response = await httpClient.SendAsync(req, cancellationToken);
-            return await response.Content.ReadAsStringAsync();
+
+            var openapiBody = await response.Content.ReadAsStringAsync();
+            var openApiStringReader = new OpenApiStringReader();
+            var openApiDocument = openApiStringReader.Read(openapiBody, out var diagnostic);
+            return openApiDocument;
+        }
+
+        public async Task<DateTimeOffset> LastUpdate(CancellationToken cancellationToken = default)
+        {
+            if (this.LastUpdated != default)
+            {
+                return this.LastUpdated;
+            }
+
+            var responseHeaders = await this.Head(cancellationToken);
+
+            if (responseHeaders.Any(x => x.Key == "Last-Modified"))
+            {
+                this.LastUpdated = DateTimeOffset.Parse(responseHeaders.First(x => x.Key == "Last-Modified").Value.First());
+            }
+
+            return this.LastUpdated;
         }
     }
 }
