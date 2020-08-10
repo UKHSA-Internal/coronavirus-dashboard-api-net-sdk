@@ -1,6 +1,7 @@
 namespace Cov19API.Tests
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Shouldly;
     using Xunit;
@@ -36,6 +37,13 @@ namespace Cov19API.Tests
         {
             var lastUpdate = await this.api.LastUpdate();
             lastUpdate.ShouldNotBe(default);
+        }
+        
+        [Fact]
+        public async Task Head_Integrity()
+        {
+            var headers = await this.api.Head();
+            headers.Any(x => x.Key == "Content-Location").ShouldBeTrue();
         }
     }
 }
