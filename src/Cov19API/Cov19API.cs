@@ -23,9 +23,9 @@ namespace Cov19API
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
     using Microsoft.OpenApi.Models;
     using Microsoft.OpenApi.Readers;
     using Newtonsoft.Json;
@@ -71,7 +71,58 @@ namespace Cov19API
             this.props = props;
         }
 
-        private async Task<(APIJSONResponse<T> Response, int TotalPages)> GetPagedData<T>(Format format, CancellationToken cancellationToken)
+        private async Task<(XDocument Xml, int TotalPages)> GetPagedXmlData(Format format, CancellationToken cancellationToken)
+        {
+            XDocument xDocResult = null;
+            var currentPage = 1;
+
+            while (true)
+            {
+                var httpClient = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }) { Timeout = TimeSpan.FromSeconds(10) };
+                var url = this.Endpoint + this.ApiParams + $"&page={currentPage}" + $"&format={format.ToString().ToLower()}";
+                var response = await httpClient.GetAsync(url, cancellationToken);
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    break;
+                }
+
+                if ((int)response.StatusCode >= 400)
+                {
+                    throw new Exception(response.StatusCode.ToString());
+                }
+
+                this.LastUpdated = response.Content.Headers.LastModified ?? default;
+
+                var stream = await response.Content.ReadAsStreamAsync();
+                var xdoc = await XDocument.LoadAsync(stream, LoadOptions.None, cancellationToken);
+                if (xDocResult == null)
+                {
+                    xDocResult = xdoc;
+                }
+                else
+                {
+                    xDocResult.Root.Add(xdoc.Root.Descendants("data"));
+                }
+
+                currentPage++;
+            }
+
+            return (xDocResult, currentPage - 1); 
+        }
+
+        public async Task<XDocument> GetXml(CancellationToken cancellationToken = default)
+        {
+            var data = await this.GetPagedXmlData(Format.XML, cancellationToken);
+            data.Xml.Root.Element("length").Value = data.Xml.Descendants("data").Count().ToString();
+            data.Xml.Root.Add(new XElement("totalPages", data.TotalPages));
+            data.Xml.Root.Add(new XElement("lastUpdate", this.LastUpdated.ToString("O")));
+            data.Xml.Root.Descendants("pagination").Remove();
+            data.Xml.Root.Descendants("maxPageLimit").Remove();
+            return data.Xml;
+        }
+
+        private async Task<(APIJSONResponse<T> Response, int TotalPages)> GetPagedJsonData<T>(Format format, CancellationToken cancellationToken)
         {
             var result = new APIJSONResponse<T> { Data = new List<T>() };
 
@@ -99,7 +150,7 @@ namespace Cov19API
                 var jObject = JObject.Parse(body);
                 var data = JsonConvert.DeserializeObject<List<T>>(jObject["data"].ToString());
 
-                result.Data = data;
+                result.Data = result.Data.Concat(data).ToList();
 
                 currentPage++;
             }
@@ -109,7 +160,7 @@ namespace Cov19API
 
         public async Task<JSONResponse<T>> Get<T>(Format format = Format.JSON, CancellationToken cancellationToken = default)
         {
-            var data = await this.GetPagedData<T>(format, cancellationToken);
+            var data = await this.GetPagedJsonData<T>(format, cancellationToken);
             return new JSONResponse<T>
             {
                 Length = data.Response.Data.Count,

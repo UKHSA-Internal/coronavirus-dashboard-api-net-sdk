@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace SampleApp
+﻿namespace SampleApp
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Cov19API;
@@ -38,6 +37,9 @@ namespace SampleApp
             {
                 Console.WriteLine(httpResponseHeader.Key + " : " + string.Join(",", httpResponseHeader.Value));
             }
+
+            var xml = await cov19api.GetXml();
+            Console.WriteLine(xml.ToString());
         }
     }
 }
