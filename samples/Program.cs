@@ -19,8 +19,10 @@
             var cov19api = new Cov19Api(new UkCovid19Props
             {
                 FiltersType = new Dictionary<string, string> { { "areaType", "nation" }, { "areaName", "England" } },
-                StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } }
+                StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } },
+                LatestBy = "newCasesByPublishDate"
             });
+            
 
             var data = await cov19api.Get<CovidData>();
 
@@ -29,8 +31,11 @@
                 Console.WriteLine($"Date:{covidData.MyDate} No. of New Cases:{covidData.NewCases}");
             }
 
+            var dateTimeOffset = await cov19api.LastUpdate();
+            Console.WriteLine(dateTimeOffset.ToString("O"));
+            
             var openApi = await cov19api.Options();
-            Console.WriteLine(openApi);
+            Console.WriteLine(openApi.ToString());
 
             var headers = await cov19api.Head();
             foreach (var httpResponseHeader in headers)
