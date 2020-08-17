@@ -98,6 +98,6 @@ If you prefer OpenAPI, you can use the `cov10api.Options()` which will return a 
 
 -----------
 
-Developed and maintained by [Public Health England](https://www.gov.uk/government/organisations/public-health-england).
+Developed by [Jonathan Channon](https://github.com/jchannon) and maintained by [Public Health England](https://www.gov.uk/government/organisations/public-health-england).
 
 Copyright (c) 2020, Public Health England.
