@@ -31,6 +31,9 @@ namespace Cov19API
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// Defines the entrypoint to the API
+    /// </summary>
     public class Cov19Api
     {
         private readonly UkCovid19Props props;
@@ -45,32 +48,22 @@ namespace Cov19API
                 LatestBy = this.props.LatestBy
             };
 
-        internal class APIParams
-        {
-            public string Filters { get; set; }
-
-            public string Structure { get; set; }
-
-            public string LatestBy { get; set; }
-
-            public override string ToString()
-            {
-                return $"?filters={Filters}&structure={Structure}&latestby={LatestBy}";
-            }
-        }
+        private DateTimeOffset LastUpdated { get; set; }
 
         private class APIJSONResponse<T>
         {
             public List<T> Data { get; set; }
         }
 
-        private DateTimeOffset LastUpdated { get; set; }
-
+        /// <summary>
+        /// Creates an instance of <see cref="Cov19Api"/>
+        /// </summary>
+        /// <param name="props">An instance of <see cref="UkCovid19Props"/></param>
         public Cov19Api(UkCovid19Props props)
         {
             this.props = props;
         }
-        
+
         private async Task<(XDocument Xml, int TotalPages)> GetPagedXmlData(CancellationToken cancellationToken)
         {
             XDocument xDocResult = null;
@@ -111,6 +104,11 @@ namespace Cov19API
             return (xDocResult, currentPage - 1);
         }
 
+        /// <summary>
+        /// Get an XML representation of the API data
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A <see cref="Task{XDocument}"/> instance</returns>
         public async Task<XDocument> GetXml(CancellationToken cancellationToken = default)
         {
             var data = await this.GetPagedXmlData(cancellationToken);
@@ -158,6 +156,12 @@ namespace Cov19API
             return (result, currentPage - 1);
         }
 
+        /// <summary>
+        /// Get a strongly typed instance representing the API data
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <typeparam name="T">The <see cref="Type"/> of the value to return</typeparam>
+        /// <returns>An instance of <typeparamref name="T"/></returns>
         public async Task<JSONResponse<T>> Get<T>(CancellationToken cancellationToken = default)
         {
             var data = await this.GetPagedJsonData<T>(cancellationToken);
@@ -170,6 +174,11 @@ namespace Cov19API
             };
         }
 
+        /// <summary>
+        /// Get an array of API headers
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A <see cref="T:Task{IEnumerable{KeyValuePair{string,string}}}}" /></returns>
         public async Task<IEnumerable<KeyValuePair<string, IEnumerable<string>>>> Head(CancellationToken cancellationToken = default)
         {
             var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
@@ -178,6 +187,11 @@ namespace Cov19API
             return response.Headers.Concat(response.Content.Headers);
         }
 
+        /// <summary>
+        /// Get an OpenAPI representation of the API
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A <see cref="Task{OpenApiDocument}"/></returns>
         public async Task<OpenApiDocument> Options(CancellationToken cancellationToken = default)
         {
             var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
@@ -190,6 +204,11 @@ namespace Cov19API
             return openApiDocument;
         }
 
+        /// <summary>
+        /// Signals the last time the API was called
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+        /// <returns>A <see cref="Task{DateTimeOffset}"/></returns>
         public async Task<DateTimeOffset> LastUpdate(CancellationToken cancellationToken = default)
         {
             if (this.LastUpdated != default)
