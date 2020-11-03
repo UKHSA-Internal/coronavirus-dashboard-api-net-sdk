@@ -34,7 +34,7 @@ We would like to extract the number of new cases England using the API.
 We start off by adding the project via [NuGet]():
 
 ```bash
-dotnet add package Cov19API
+dotnet add package UKCovid19
 ```
 In our application or library we can then instantiate the API by providing [filters](https://coronavirus.data.gov.uk/developers-guide#params-filters) and a [structure](https://coronavirus.data.gov.uk/developers-guide#params-structure):
 NOTE: The structure key/value object must use one of the valid metrics for the value however the key can match to any property you have on a POCO.
@@ -60,20 +60,7 @@ foreach (var covidData in data.Data)
 }
 ```
 
-You may also use `cov19api.GetXml()` to return the data into a .NET `XDocument` object. This is exemplified later 
-in this document.
-
-To see the timestamp for the last update, run:
-
-```csharp
-var dateTimeOffset = await cov19api.LastUpdate();
-Console.WriteLine(dateTimeOffset.ToString("O"));
-```
-
-```
-2020-07-28T15:34:31.000Z
-```
-
+##### LatestBy metric
 To get the latest data by a specific metric, you can supply the `LatestBy` argument to the API:
 
 ```csharp
@@ -89,10 +76,27 @@ var cov19api = new Cov19Api(new UkCovid19Props
 Date:08/17/2020 00:00:00 No. of New Cases:634
 ```
 
+##### Xml
+You may also use `cov19api.GetXml()` to return the data into a .NET `XDocument` object.
+
+##### Latest Update
+To see the timestamp for the last update, run:
+
+```csharp
+var dateTimeOffset = await cov19api.LastUpdate();
+Console.WriteLine(dateTimeOffset.ToString("O"));
+```
+
+```
+2020-07-28T15:34:31.000Z
+```
+
+##### HTTP HEAD
 To get an underlying picture of the API you can use the `cov19api.Head()` method which will return all the headers from the underlying API
 which will return `IEnumerable<KeyValuePair<string, IEnumerable<string>>>`.
 
-If you prefer OpenAPI, you can use the `cov10api.Options()` which will return a `OpenApiDocument` object that can be inspected. 
+##### OpenAPI
+If you prefer OpenAPI, you can use `cov10api.Options()` which will return a `OpenApiDocument` object that can be inspected. 
 
 
 

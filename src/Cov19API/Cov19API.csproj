@@ -4,11 +4,20 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <PackageId>UKCovid19</PackageId>
         <Version>1.0.0</Version>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <Authors>Jonathan Channon</Authors>
+        <Description>This is a .NET SDK for the COVID-19 API, as published by Public Health England on Coronavirus (COVID-19) in the UK dashboard.</Description>
+        <PackageTags>covid;covid19;covid-19;pandemic;coronavirus;corona;virus;api-service;covid19-data;covid19-uk;govuk-service</PackageTags>
+        <PackageProjectUrl>https://github.com/publichealthengland/coronavirus-dashboard-api-net-sdk</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>logo.png</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.3" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Microsoft.OpenApi.Readers" Version="1.2.3"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All"/>
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3"/>
     </ItemGroup>
 
 </Project>
