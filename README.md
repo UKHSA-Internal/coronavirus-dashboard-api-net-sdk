@@ -54,9 +54,9 @@ var cov19api = new Cov19Api(new UkCovid19Props
 
 var covidData = await cov19api.Get<CovidData>();
 
-foreach (var covidData in data.Data)
+foreach (var data in covidData.Data)
 {
-    Console.WriteLine($"Date:{covidData.MyDate} No. of New Cases:{covidData.NewCases}");
+    Console.WriteLine($"Date:{data.MyDate} No. of New Cases:{data.NewCases}");
 }
 ```
 
