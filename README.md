@@ -49,15 +49,18 @@ public class CovidData
 var cov19api = new Cov19Api(new UkCovid19Props
 {
     FiltersType = new Dictionary<string, string> { { "areaType", "nation" }, { "areaName", "England" } },
-    StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } }
+    StructureType = new Dictionary<string, string> { { "MyDate", "date" }, { "newCases", "newCasesByPublishDate" } },
+    LatestBy = "newCasesByPublishDate"
 });
 
-var covidData = await cov19api.Get<CovidData>();
 
-foreach (var data in covidData.Data)
+var data = await cov19api.Get<CovidData>();
+
+foreach (var covidData in data.Data)
 {
-    Console.WriteLine($"Date:{data.MyDate} No. of New Cases:{data.NewCases}");
+    Console.WriteLine($"Date:{covidData.MyDate} No. of New Cases:{covidData.NewCases}");
 }
+
 ```
 
 ##### LatestBy metric
