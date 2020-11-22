@@ -31,7 +31,7 @@ To install visit [here](https://dotnet.microsoft.com/download) and download the 
 
 We would like to extract the number of new cases England using the API.
 
-We start off by adding the project via [NuGet]():
+We start off by adding the project via [NuGet](https://www.nuget.org/packages/UKCovid19/):
 
 ```bash
 dotnet add package UKCovid19
