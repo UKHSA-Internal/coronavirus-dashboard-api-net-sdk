@@ -99,7 +99,7 @@ To get an underlying picture of the API you can use the `cov19api.Head()` method
 which will return `IEnumerable<KeyValuePair<string, IEnumerable<string>>>`.
 
 ##### OpenAPI
-If you prefer OpenAPI, you can use `cov10api.Options()` which will return a `OpenApiDocument` object that can be inspected. 
+If you prefer OpenAPI, you can use `cov19api.Options()` which will return a `OpenApiDocument` object that can be inspected. 
 
 
 
