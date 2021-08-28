@@ -217,11 +217,11 @@ namespace Cov19API
             }
 
             var responseHeaders = await this.Head(cancellationToken);
-
-            if (responseHeaders.Any(x => x.Key == "Last-Modified"))
-            {
-                this.LastUpdated = DateTimeOffset.Parse(responseHeaders.First(x => x.Key == "Last-Modified").Value.First());
-            }
+            
+            try {
+                const modified = responseHeaders.First(x => x.Key == "Last-Modified");
+                this.LastUpdated = DateTimeOffset.Parse(modified.Value.First());
+            } catch (InvalidOperationException e) {}
 
             return this.LastUpdated;
         }
